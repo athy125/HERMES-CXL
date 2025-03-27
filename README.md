@@ -62,7 +62,7 @@ HERMES-CXL performance has been rigorously evaluated through a comprehensive set
 
 ### Memory Bandwidth Characterization
 
-![Bandwidth Comparison](docs/images/bandwidth_comparison.png)
+![Bandwidth Comparison](test/results/bandwidth_comparison.png)
 
 This visualization presents a comparative analysis of memory bandwidth achieved by HERMES-CXL versus conventional memory architectures across varying transfer sizes. Several critical observations emerge from this data:
 
@@ -76,7 +76,7 @@ This visualization presents a comparative analysis of memory bandwidth achieved 
 
 ### Access Latency Profile Analysis
 
-![Latency Heatmap](docs/images/latency_heatmap.png)
+![Latency Heatmap](test/results/latency_heatmap.png)
 
 This sophisticated heatmap visualization decomposes memory access latency across diverse access patterns and memory subsystem interfaces. The color gradient encodes absolute latency values in nanoseconds, with deeper blue regions representing superior performance:
 
@@ -90,7 +90,7 @@ This sophisticated heatmap visualization decomposes memory access latency across
 
 ### Concurrency Scaling Characteristics
 
-![Scaling Performance](docs/images/scaling_performance.png)
+![Scaling Performance](test/results/scaling_performance.png)
 
 This visualization quantifies how effectively HERMES-CXL maintains performance under increasing concurrency, a critical factor for multi-threaded and multi-process applications:
 
@@ -104,7 +104,7 @@ This visualization quantifies how effectively HERMES-CXL maintains performance u
 
 ### Operation-Specific Performance Matrix
 
-![Operations Performance](docs/images/operations_performance_3d.png)
+![Operations Performance](test/results/operations_performance_3d.png)
 
 This multidimensional visualization presents a comprehensive performance landscape across operation types and data sizes, providing insight into HERMES-CXL's operational characteristics:
 
