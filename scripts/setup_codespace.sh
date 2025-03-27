@@ -23,7 +23,7 @@ g++ -std=c++17 -Wall -fPIC -shared -o build/libcxl_sim.so src/lib/libcxl.cpp -I.
 g++ -std=c++17 -Wall -o build/cxl_system_sim src/app/cxl_system.cpp -I./include -L./build -lcxl_sim -DSIMULATION_MODE -Wl,-rpath,./build
 
 # Setup Python test environment
-pip3 install pytest
+pip3 install numpy matplotlib seaborn pandas ipywidgets jupyter
 mkdir -p test/results
 
 # Echo completion message
