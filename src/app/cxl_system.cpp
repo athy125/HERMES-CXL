@@ -2,6 +2,10 @@
 // A prototype implementation for efficient CPU-device communication
 // Using CXL for memory expansion and acceleration
 
+
+#include "cxl_common.h"
+#include "cxl_memory_manager.h"
+#include "cxl_api.h"
 #include <iostream>
 #include <fcntl.h>
 #include <unistd.h>
