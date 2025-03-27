@@ -219,4 +219,4 @@ static long cxl_fpga_ioctl(struct file *file, unsigned int cmd, unsigned long ar
                 }
             } else {
                 query.status = CXL_CMD_STATUS_INVALID;
-                query.result
+                query.result = 0;
