@@ -21,13 +21,13 @@ echo "Running HERMES-CXL system with simulation..."
 echo "=============================================================="
 ./build/cxl_system_sim
 
-# Run basic performance tests
+# Run performance tests and generate visualizations
 echo -e "\n=============================================================="
-echo "Running performance tests..."
+echo "Running performance tests and generating visualizations..."
 echo "=============================================================="
 cd test
-python3 test_framework.py --simulation --device /tmp/cxl_sim/cxl0 --test bandwidth
-python3 test_framework.py --simulation --device /tmp/cxl_sim/cxl0 --test latency
+mkdir -p results
+python3 test_framework.py --simulation --device /tmp/cxl_sim/cxl0 --test all
 
 # Return to root directory
 cd ..
@@ -37,3 +37,13 @@ echo -e "\n=============================================================="
 echo "Demo completed successfully!"
 echo "Test results and visualizations can be found in test/results/"
 echo "=============================================================="
+
+# If in Codespaces, display how to view visualizations
+if [ -n "$CODESPACES" ]; then
+    echo "To view visualizations in Codespaces:"
+    echo "1. Open the Explorer (left sidebar)"
+    echo "2. Navigate to test/results/"
+    echo "3. Right-click on any image and select 'Open Preview'"
+    echo -e "\nOr run this command to see all visualizations:"
+    echo "code-server --open-browser test/results/"
+fi
