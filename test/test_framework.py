@@ -221,4 +221,194 @@ def run_latency_test(harness, iterations):
     print("\n--- Latency Test ---")
     
     latency = harness.test_memory_latency(iterations)
-    print(f"Memory access latency
+    print(f"Memory access latency: {latency:.2f} ns")
+    return latency
+
+
+def run_fpga_acceleration_test(harness, iterations):
+    """Test FPGA acceleration operations"""
+    print("\n--- FPGA Acceleration Test ---")
+    
+    operations = ["memcpy", "memfill", "compute"]
+    results = []
+    
+    for op in operations:
+        print(f"Testing FPGA {op} acceleration...")
+        perf = harness.test_fpga_acceleration(op, iterations)
+        results.append(perf)
+        
+        if op == "memcpy" or op == "memfill":
+            print(f"  {op} performance: {perf:.2f} GB/s")
+        else:
+            print(f"  {op} performance: {perf:.2f} GFLOPS")
+    
+    # Plot results
+    plt.figure(figsize=(8, 6))
+    plt.bar(operations, results)
+    plt.xlabel('Operation Type')
+    plt.ylabel('Performance (GB/s or GFLOPS)')
+    plt.title('CXL FPGA Acceleration Performance')
+    plt.grid(True, axis='y')
+    plt.savefig('cxl_fpga_acceleration.png')
+    
+    return results
+
+
+def run_concurrency_test(harness, num_processes, block_size, iterations):
+    """Run concurrency test with multiple processes"""
+    print("\n--- Concurrency Test ---")
+    print(f"Testing with {num_processes} concurrent processes")
+    
+    # Test write bandwidth with multiple processes
+    write_results = harness.test_with_multiple_processes(
+        num_processes, block_size, iterations, "write"
+    )
+    
+    # Test read bandwidth with multiple processes
+    read_results = harness.test_with_multiple_processes(
+        num_processes, block_size, iterations, "read"
+    )
+    
+    # Calculate aggregate bandwidth
+    total_write_bw = sum(write_results)
+    total_read_bw = sum(read_results)
+    
+    print(f"Aggregate write bandwidth: {total_write_bw:.2f} GB/s")
+    print(f"Aggregate read bandwidth: {total_read_bw:.2f} GB/s")
+    
+    # Plot results
+    processes = list(range(1, num_processes + 1))
+    
+    plt.figure(figsize=(10, 6))
+    plt.bar(np.array(processes) - 0.2, write_results, width=0.4, label='Write Bandwidth')
+    plt.bar(np.array(processes) + 0.2, read_results, width=0.4, label='Read Bandwidth')
+    plt.xlabel('Process ID')
+    plt.ylabel('Bandwidth (GB/s)')
+    plt.title('CXL Memory Bandwidth per Process')
+    plt.grid(True, axis='y')
+    plt.legend()
+    plt.savefig('cxl_concurrency.png')
+    
+    return total_write_bw, total_read_bw
+
+
+def plot_comparison(block_sizes, cxl_write, cxl_read, std_write, std_read):
+    """Plot comparison between CXL and standard memory"""
+    plt.figure(figsize=(12, 8))
+    
+    # Plot write bandwidth comparison
+    plt.subplot(2, 1, 1)
+    plt.plot([size/1024 for size in block_sizes], cxl_write, 'b-o', label='CXL Write')
+    plt.plot([size/1024 for size in block_sizes], std_write, 'b--o', label='Standard Write')
+    plt.xlabel('Block Size (KB)')
+    plt.ylabel('Bandwidth (GB/s)')
+    plt.title('Write Bandwidth: CXL vs Standard Memory')
+    plt.grid(True)
+    plt.legend()
+    
+    # Plot read bandwidth comparison
+    plt.subplot(2, 1, 2)
+    plt.plot([size/1024 for size in block_sizes], cxl_read, 'r-o', label='CXL Read')
+    plt.plot([size/1024 for size in block_sizes], std_read, 'r--o', label='Standard Read')
+    plt.xlabel('Block Size (KB)')
+    plt.ylabel('Bandwidth (GB/s)')
+    plt.title('Read Bandwidth: CXL vs Standard Memory')
+    plt.grid(True)
+    plt.legend()
+    
+    plt.tight_layout()
+    plt.savefig('cxl_vs_standard.png')
+
+
+def compare_with_standard_memory(block_sizes, iterations):
+    """Compare CXL memory with standard system memory"""
+    print("\n--- Comparing CXL vs Standard Memory ---")
+    
+    std_write_results = []
+    std_read_results = []
+    
+    # Create temporary buffers for testing
+    for size in block_sizes:
+        print(f"Testing with block size: {size / 1024:.1f} KB")
+        
+        # Allocate source and destination buffers
+        src_buffer = np.ones(size, dtype=np.uint8)
+        dst_buffer = np.zeros(size, dtype=np.uint8)
+        
+        # Test write bandwidth (memcpy simulates write)
+        start_time = time.time()
+        for _ in range(iterations):
+            np.copyto(dst_buffer, src_buffer)
+        end_time = time.time()
+        
+        elapsed = end_time - start_time
+        write_bw = (size * iterations) / (elapsed * 1024 * 1024 * 1024)
+        std_write_results.append(write_bw)
+        print(f"  Standard memory write bandwidth: {write_bw:.2f} GB/s")
+        
+        # Test read bandwidth (just reading the buffer multiple times)
+        start_time = time.time()
+        for _ in range(iterations):
+            # Force reads by summing the buffer
+            _ = np.sum(src_buffer)
+        end_time = time.time()
+        
+        elapsed = end_time - start_time
+        read_bw = (size * iterations) / (elapsed * 1024 * 1024 * 1024)
+        std_read_results.append(read_bw)
+        print(f"  Standard memory read bandwidth: {read_bw:.2f} GB/s")
+    
+    return std_write_results, std_read_results
+
+
+def main():
+    """Main function to run the CXL performance test framework"""
+    parser = argparse.ArgumentParser(description='CXL Performance Testing Framework')
+    parser.add_argument('--device', default=DEFAULT_CXL_DEVICE, help='CXL device path')
+    parser.add_argument('--size', type=int, default=DEFAULT_MEM_SIZE, help='Memory size in bytes')
+    parser.add_argument('--iterations', type=int, default=DEFAULT_ITERATIONS, help='Number of test iterations')
+    parser.add_argument('--processes', type=int, default=4, help='Number of processes for concurrency test')
+    parser.add_argument('--test', choices=['all', 'bandwidth', 'latency', 'concurrency', 'fpga', 'compare'],
+                        default='all', help='Test to run')
+    args = parser.parse_args()
+    
+    # Initialize the test harness
+    harness = CXLTestHarness(args.device, args.size)
+    if not harness.initialize():
+        print("Failed to initialize test harness. Exiting.")
+        return 1
+    
+    try:
+        # Run selected tests
+        if args.test == 'all' or args.test == 'bandwidth':
+            cxl_write, cxl_read = run_bandwidth_tests(harness, DEFAULT_BLOCK_SIZES, args.iterations)
+        
+        if args.test == 'all' or args.test == 'latency':
+            run_latency_test(harness, args.iterations)
+        
+        if args.test == 'all' or args.test == 'concurrency':
+            run_concurrency_test(harness, args.processes, DEFAULT_BLOCK_SIZES[5], args.iterations)
+        
+        if args.test == 'all' or args.test == 'fpga':
+            run_fpga_acceleration_test(harness, args.iterations)
+        
+        if args.test == 'all' or args.test == 'compare':
+            std_write, std_read = compare_with_standard_memory(DEFAULT_BLOCK_SIZES, args.iterations)
+            if args.test == 'all':
+                plot_comparison(DEFAULT_BLOCK_SIZES, cxl_write, cxl_read, std_write, std_read)
+        
+        print("\nTests completed successfully!")
+    
+    except Exception as e:
+        print(f"Error during testing: {e}")
+        return 1
+    
+    finally:
+        # Clean up resources
+        harness.cleanup()
+    
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
