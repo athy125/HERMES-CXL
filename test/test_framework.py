@@ -1,4 +1,5 @@
 # Add these imports at the top
+import os 
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib import cm
