@@ -78,7 +78,7 @@ This visualization presents a comparative analysis of memory bandwidth achieved 
 
 ![Latency Heatmap](test/results/latency_heatmap.png)
 
-This sophisticated heatmap visualization decomposes memory access latency across diverse access patterns and memory subsystem interfaces. The color gradient encodes absolute latency values in nanoseconds, with deeper blue regions representing superior performance:
+This heatmap visualization decomposes memory access latency across diverse access patterns and memory subsystem interfaces. The color gradient encodes absolute latency values in nanoseconds, with deeper blue regions representing superior performance:
 
 1. **Pattern-Specific Optimization**: HERMES-CXL exhibits particularly notable latency advantages for sequential access patterns (42ns versus 58ns for standard memory), while maintaining competitive performance even for challenging random access scenarios (85ns versus 115ns).
 
@@ -126,7 +126,7 @@ This multidimensional visualization presents a comprehensive performance landsca
 
 ## Simulation Environment
 
-For environments without CXL hardware infrastructure, HERMES-CXL includes a sophisticated simulation mode that accurately models the architectural behavior and performance characteristics:
+For environments without CXL hardware infrastructure, HERMES-CXL includes a simulation mode that accurately models the architectural behavior and performance characteristics:
 
 ```bash
 # Configure the simulation environment
